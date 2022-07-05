@@ -13,7 +13,7 @@ Requires:
 Written by Stephen Dade (stephen_dade@hotmail.com)
 
 MAVProxy cmd to use to connect:
-mavproxy.py --master=udpout:127.0.0.1:16000 --streamrate=1 --console
+mavproxy.py --master=udpout:127.0.0.1:16000 --streamrate=1 --console --mav10
 
 '''
 from argparse import ArgumentParser
@@ -27,7 +27,7 @@ import errno
 from urllib.parse import quote
 
 from Adafruit_IO import Client
-from pymavlink.dialects.v20 import ardupilotmega as mavlink2
+from pymavlink.dialects.v10 import ardupilotmega as mavlink1
 
 ROCK7_URL = 'https://rockblock.rock7.com/rockblock/MT'
 
@@ -73,8 +73,8 @@ if __name__ == '__main__':
     aio = Client(args.adafruitusername, args.adafruitkey)
     lastpacket = None
     
-    mavUAV = mavlink2.MAVLink(255, 0, use_native=False)
-    mavGCS = mavlink2.MAVLink(255, 0, use_native=False)
+    mavUAV = mavlink1.MAVLink(255, 0, use_native=False)
+    mavGCS = mavlink1.MAVLink(255, 0, use_native=False)
     
     out_ip = args.out.split(':')[0]
     out_port = int(args.out.split(':')[1])
@@ -113,19 +113,15 @@ if __name__ == '__main__':
                                                                                datetime_object))
             lastpacket = data
             
-            #re-add missing parts of message that we had to trim (mavlink header and compat flag)
-            fullpkt = "fd" + data['data'][0:2] + "00" + data['data'][2:]
-            print(fullpkt)
-            
             # Parse incoming bytes - debugging
-            msgList = mavUAV.parse_buffer(bytes.fromhex(fullpkt))
+            msgList = mavUAV.parse_buffer(bytes.fromhex(data['data']))
             if msgList:
                 for msg in msgList:
                     print(msg)
                    
             # send on to GCS (raw bytes)
             if clientIPPort:
-                UDPClientSocket.sendto(bytes.fromhex(fullpkt), clientIPPort)
+                UDPClientSocket.sendto(bytes.fromhex(data['data']), clientIPPort)
             
         # get incoming bytes from GCS
         data = None
@@ -144,7 +140,7 @@ if __name__ == '__main__':
                 clientIPPort = addr
                 try:
                     msgList = mavGCS.parse_buffer(data)
-                except mavlink2.MAVError:
+                except mavlink1.MAVError:
                     pass
                 if msgList:
                     for msg in msgList:
