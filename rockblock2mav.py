@@ -13,7 +13,7 @@ Requires:
 Written by Stephen Dade (stephen_dade@hotmail.com)
 
 MAVProxy cmd to use to connect:
-mavproxy.py --master=udpout:127.0.0.1:16000 --streamrate=1 --console --mav10
+mavproxy.py --master=udpout:127.0.0.1:16000 --streamrate=1 --console --mav10 --map
 
 '''
 from argparse import ArgumentParser
