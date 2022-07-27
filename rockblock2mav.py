@@ -87,9 +87,6 @@ if __name__ == '__main__':
     UDPClientSocket.settimeout(1.0)
     UDPClientSocket.setblocking(0)
     
-    # When was the last command sent? Need to avoid spamming
-    lastSendCmd = time.time()
-    
     while True:
         # get the raw data from AdafruitIO
         try:
@@ -145,8 +142,7 @@ if __name__ == '__main__':
                 if msgList:
                     for msg in msgList:
                         #print(msg)
-                        if msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and (time.time() - lastSendCmd) > 20 and int(msg.command) in ALLOWABLE_CMDS:
-                            # Only want to send CMD_LONG and CMD_INT messages once per 20sec, to save bandwidth
+                        if msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS:
                             url = "{0}?imei={1}&username={2}&password={3}&data={4}&flush=yes".format(ROCK7_URL,
                                                                                            args.imei,
                                                                                            quote(args.rock7username),
@@ -155,7 +151,7 @@ if __name__ == '__main__':
                             print("Sending: " + str(msg))
                             response = requests.post(url, headers={"Accept": "text/plain"})
                             responseSplit = response.text.split(',')
-                            if responseSplit[0] != 'OK':
+                            if responseSplit[0] != 'OK' and len(responseSplit) > 1:
                                 if responseSplit[1] in ROCK7_TX_ERRORS.keys():
                                     print("Error sending command: " + ROCK7_TX_ERRORS[responseSplit[1]])
                                 else:
@@ -164,7 +160,6 @@ if __name__ == '__main__':
                                 if len(msg.get_msgbuf()) > 50:
                                     print("Warning, message greater than 50 bytes")
                                 print("Sent {0} bytes OK".format(len(msg.get_msgbuf())))
-                            lastSendCmd = time.time()
                         elif msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS:
                             print("Too soon to send command: " + str(msg.command))
             else:
