@@ -1,7 +1,6 @@
-# rockblock2mav
-RockBlock to MAVLink gateway.
+# RockBlock to MAVLink gateway
 
-Simple Python script for sending and receiving MAVLink messages using the RockBlock SBD modems.
+Simple Python script for sending and receiving MAVLink messages using the RockBlock SBD modems, allowing **worldwide** telemetry with an ArduPilot platform.
 
 This gateway runs on the GCS, and will send/recieve MAVLink messages between the GCS and RockBlock servers.
 
@@ -16,7 +15,6 @@ Required hardware, software and services:
 
 Due to limitations of the Rockblock web service, all received packets need to go via a public-facing web service. See https://docs.rockblock.rock7.com/docs/integration-with-application for details. For the purposes of this configuration, adafruit.io is used.
 
-The data transfer pathway is as below:
 <img src="https://raw.githubusercontent.com/stephendade/rockblock2mav/main/diagram.jpg" width="400">
 
 ## Setup:
