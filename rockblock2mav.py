@@ -95,15 +95,17 @@ if __name__ == '__main__':
             print("Error accessing Adafruit.io feed. Check the username, feed name and key are correct")
             sys.exit(0)
         
+        print("Checking for new packet at {0}".format(datetime.utcnow().strftime("%Y-%m-%d, %H:%M:%S")))
+        
         try:
             raw_data = aio.receive(raw_feed.key).value
         except errors.RequestError:
-            print("Error: No data in feed")
-            sys.exit(0)
+            print("No data in feed")
+            continue
         
         data = json.loads(raw_data)
         datetime_object = datetime.strptime(data['transmit_time'] + " UTC", '%y-%m-%d %H:%M:%S %Z')
-        print("Checking for new packet at {0}".format(datetime.utcnow().strftime("%Y-%m-%d, %H:%M:%S")))
+        
         
         #print(data)
         
