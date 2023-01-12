@@ -26,7 +26,7 @@ import requests
 import errno
 from urllib.parse import quote
 
-from Adafruit_IO import Client
+from Adafruit_IO import Client, errors
 from pymavlink.dialects.v10 import ardupilotmega as mavlink1
 
 ROCK7_URL = 'https://rockblock.rock7.com/rockblock/MT'
@@ -95,7 +95,12 @@ if __name__ == '__main__':
             print("Error accessing Adafruit.io feed. Check the username, feed name and key are correct")
             sys.exit(0)
         
-        raw_data = aio.receive(raw_feed.key).value
+        try:
+            raw_data = aio.receive(raw_feed.key).value
+        except errors.RequestError:
+            print("Error: No data in feed")
+            sys.exit(0)
+        
         data = json.loads(raw_data)
         datetime_object = datetime.strptime(data['transmit_time'] + " UTC", '%y-%m-%d %H:%M:%S %Z')
         print("Checking for new packet at {0}".format(datetime.utcnow().strftime("%Y-%m-%d, %H:%M:%S")))
