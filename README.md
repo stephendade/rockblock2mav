@@ -28,19 +28,18 @@ Due to limitations of the Rockblock web service, all received packets need to go
 - The flight controller will only send HIGH_LATENCY2 MAVlink messages. This will give basic position and status information. This message
 is sent once per 20 seconds
 - The Rockblock modem does require a full view of the sky to work reliably. It will not work indoors.
-- The only messages sent from the GCS to the Rockblock modem are the following:
-  - MAV_CMD_NAV_WAYPOINT
-  - MAV_CMD_NAV_RETURN_TO_LAUNCH
-  - MAV_CMD_NAV_LAND
-  - MAV_CMD_NAV_TAKEOFF
-  - MAV_CMD_NAV_VTOL_TAKEOFF
-  - MAV_CMD_NAV_VTOL_LAND
-  - MAV_CMD_DO_SET_MODE
-  - MAV_CMD_DO_FLIGHTTERMINATION
-  - MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN
-  - MAV_CMD_MISSION_START
-  - MAV_CMD_COMPONENT_ARM_DISARM
-  - MAV_CMD_CONTROL_HIGH_LATENCY
+- The only command (``COMMAND_LONG``, ``COMMAND_INT``) messages sent from the GCS to the Rockblock modem are the following:
+  - ``MAV_CMD_NAV_RETURN_TO_LAUNCH``
+  - ``MAV_CMD_NAV_LAND``
+  - ``MAV_CMD_NAV_TAKEOFF``
+  - ``MAV_CMD_NAV_VTOL_TAKEOFF``
+  - ``MAV_CMD_NAV_VTOL_LAND``
+  - ``MAV_CMD_DO_SET_MODE``
+  - ``MAV_CMD_MISSION_START``
+  - ``MAV_CMD_COMPONENT_ARM_DISARM``
+  - ``MAV_CMD_CONTROL_HIGH_LATENCY``
+  
+The ``MISSION_ITEM_INT`` message is also supported.
 
 
 

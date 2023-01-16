@@ -42,15 +42,12 @@ ROCK7_TX_ERRORS = {'10': 'Invalid login credentials',
                    '99': 'System Error'}
                    
 # Only send these MAVLink commands, to save bandwidth
-ALLOWABLE_CMDS = [16, #MAV_CMD_NAV_WAYPOINT
-                 20, #MAV_CMD_NAV_RETURN_TO_LAUNCH
+ALLOWABLE_CMDS = [20, #MAV_CMD_NAV_RETURN_TO_LAUNCH
                  21, #MAV_CMD_NAV_LAND
                  22, #MAV_CMD_NAV_TAKEOFF
                  84, #MAV_CMD_NAV_VTOL_TAKEOFF
                  85, #MAV_CMD_NAV_VTOL_LAND
                  176, #MAV_CMD_DO_SET_MODE
-                 185, #MAV_CMD_DO_FLIGHTTERMINATION
-                 246, #MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN
                  300, #MAV_CMD_MISSION_START
                  400, #MAV_CMD_COMPONENT_ARM_DISARM
                  2600, #MAV_CMD_CONTROL_HIGH_LATENCY
@@ -149,7 +146,7 @@ if __name__ == '__main__':
                 if msgList:
                     for msg in msgList:
                         #print(msg)
-                        if msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS:
+                        if (msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS) or msg.get_type() == 'MISSION_ITEM_INT':
                             url = "{0}?imei={1}&username={2}&password={3}&data={4}&flush=yes".format(ROCK7_URL,
                                                                                            args.imei,
                                                                                            quote(args.rock7username),
@@ -167,8 +164,6 @@ if __name__ == '__main__':
                                 if len(msg.get_msgbuf()) > 50:
                                     print("Warning, message greater than 50 bytes")
                                 print("Sent {0} bytes OK".format(len(msg.get_msgbuf())))
-                        elif msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS:
-                            print("Too soon to send command: " + str(msg.command))
             else:
                 # We've gotten all bytes from the GCS
                 do_check = False
