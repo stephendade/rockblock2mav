@@ -22,7 +22,8 @@ Due to limitations of the Rockblock web service, all received packets need to go
 2. Ensure the modem is activated in the RockBlock account
 3. Create a new feed on adafuit.io. Ensure the Feed History is OFF and a webhook is active. Connect this to your Rockblock account (https://learn.adafruit.com/using-the-rockblock-iridium-modem/forwarding-messages).
 4. Copy the Ardupilot Rockblock Lua script to the flight controller, configuring as required.
-5. Run rockblock2mav.py to send/receive telemetry on 127.0.0.1:16000. Ensure the GCS is connected to this ip/port.
+5. On the GCS install the required Python libraries via ``pip3 install adafruit-io pymavlink``
+6. On the GCS run rockblock2mav.py to send/receive telemetry on 127.0.0.1:16000. Ensure the GCS is connected to this ip/port.
 
 ## Limitations:
 - The flight controller will only send HIGH_LATENCY2 MAVlink messages. This will give basic position and status information. This message
