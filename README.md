@@ -9,7 +9,7 @@ compared to MAVLink2.
 
 Required hardware, software and services:
 - Rockblock Modem (such as https://www.sparkfun.com/products/14498 and cable https://www.sparkfun.com/products/14720)
-- ArduPilot 4.3+ with a flight controller capable of running Lua scripts
+- ArduPilot 4.4+ with a flight controller capable of running Lua scripts
 - Active RockBlock account (https://rockblock.rock7.com/Operations)
 - Adafuit.io account (https://io.adafruit.com/)
 
