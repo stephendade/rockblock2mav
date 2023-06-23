@@ -123,6 +123,8 @@ if __name__ == '__main__':
             # send on to GCS (raw bytes)
             if clientIPPort:
                 UDPClientSocket.sendto(bytes.fromhex(data['data']), clientIPPort)
+        elif lastpacket != data:
+            print("Adafruit.io packet too old. Packet time = {0}, Current time = {1}".format(datetime_object, datetime.utcnow()))
             
         # get incoming bytes from GCS
         data = None
@@ -145,7 +147,6 @@ if __name__ == '__main__':
                     pass
                 if msgList:
                     for msg in msgList:
-                        #print(msg)
                         if (msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS) or msg.get_type() == 'MISSION_ITEM_INT':
                             url = "{0}?imei={1}&username={2}&password={3}&data={4}&flush=yes".format(ROCK7_URL,
                                                                                            args.imei,
@@ -155,15 +156,16 @@ if __name__ == '__main__':
                             print("Sending: " + str(msg))
                             response = requests.post(url, headers={"Accept": "text/plain"})
                             responseSplit = response.text.split(',')
+                            if len(msg.get_msgbuf()) > 50:
+                                print("Warning, message greater than 50 bytes")
                             if responseSplit[0] != 'OK' and len(responseSplit) > 1:
                                 if responseSplit[1] in ROCK7_TX_ERRORS.keys():
                                     print("Error sending command: " + ROCK7_TX_ERRORS[responseSplit[1]])
                                 else:
                                     print("Unknown error: " + response)
                             else:
-                                if len(msg.get_msgbuf()) > 50:
-                                    print("Warning, message greater than 50 bytes")
                                 print("Sent {0} bytes OK".format(len(msg.get_msgbuf())))
+                            
             else:
                 # We've gotten all bytes from the GCS
                 do_check = False
