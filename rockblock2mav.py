@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument("-adafruitfeed", help="Adafruit.io feed name")
     parser.add_argument("-adafruitkey", help="Adafruit.io key")
     parser.add_argument("-imei", help="Iridium Modem IMEI")
-    parser.add_argument("-out", default="127.0.0.1:16000", help="MAVLink UDPIn IP:Port to output packets to")
+    parser.add_argument("-out", default="udpin:127.0.0.1:16000", help="MAVLink udpin:IP:Port or udpout:IP:Port to output packets to")
     parser.add_argument("-rock7username", help="Rock7 username")
     parser.add_argument("-rock7password", help="Rock7 password")
 
@@ -73,14 +73,16 @@ if __name__ == '__main__':
     mavUAV = mavlink1.MAVLink(255, 0, use_native=False)
     mavGCS = mavlink1.MAVLink(255, 0, use_native=False)
     
-    out_ip = args.out.split(':')[0]
-    out_port = int(args.out.split(':')[1])
+    udp_dir = args.out.split(':')[0]
+    out_ip = args.out.split(':')[1]
+    out_port = int(args.out.split(':')[2])
     
     clientIPPort = None
     
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    UDPClientSocket.bind((out_ip, out_port))
+    if udp_dir == 'udpin':
+        UDPClientSocket.bind((out_ip, out_port))
     UDPClientSocket.settimeout(1.0)
     UDPClientSocket.setblocking(0)
     
@@ -121,8 +123,10 @@ if __name__ == '__main__':
                     print(msg)
                    
             # send on to GCS (raw bytes)
-            if clientIPPort:
+            if clientIPPort and udp_dir == 'udpin':
                 UDPClientSocket.sendto(bytes.fromhex(data['data']), clientIPPort)
+            elif udp_dir == 'udpout':
+                UDPClientSocket.sendto(bytes.fromhex(data['data']), (out_ip, out_port))
         elif lastpacket != data:
             print("Adafruit.io packet too old. Packet time = {0}, Current time = {1}".format(datetime_object, datetime.utcnow()))
             

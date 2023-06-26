@@ -25,6 +25,11 @@ Due to limitations of the Rockblock web service, all received packets need to go
 5. On the GCS install the required Python libraries via ``pip3 install adafruit-io pymavlink``
 6. On the GCS run rockblock2mav.py to send/receive telemetry on 127.0.0.1:16000. Ensure the GCS is connected to this ip/port.
 
+Note for QGC users:
+- Use the "udpin" output option, as the default "udpout" isn't compatible. For example ``rockblock2mav.py -out:udpout:127.0.0.1:16000``
+
+Note that Mission Planner is not supported at this time.
+
 ## Limitations:
 - The flight controller will only send HIGH_LATENCY2 MAVlink messages. This will give basic position and status information. This message
 is sent once per 20 seconds
