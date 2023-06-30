@@ -151,7 +151,7 @@ if __name__ == '__main__':
                     pass
                 if msgList:
                     for msg in msgList:
-                        if (msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS) or msg.get_type() == 'MISSION_ITEM_INT':
+                        if (msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT', 'SET_MODE'] and int(msg.command) in ALLOWABLE_CMDS) or msg.get_type() == 'MISSION_ITEM_INT':
                             url = "{0}?imei={1}&username={2}&password={3}&data={4}&flush=yes".format(ROCK7_URL,
                                                                                            args.imei,
                                                                                            quote(args.rock7username),
