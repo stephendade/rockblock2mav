@@ -26,7 +26,7 @@ Due to limitations of the Rockblock web service, all received packets need to go
 6. On the GCS run rockblock2mav.py to send/receive telemetry on 127.0.0.1:16000. Ensure the GCS is connected to this ip/port.
 
 Note for QGC users:
-- Use the "udpin" output option, as the default "udpout" isn't compatible. For example ``rockblock2mav.py -out:udpout:127.0.0.1:16000``
+- Use the "udpin" output option, as the default "udpout" isn't compatible. For example ``rockblock2mav-adafruit.py -out:udpout:127.0.0.1:16000``
 
 Note that Mission Planner is not supported at this time.
 
