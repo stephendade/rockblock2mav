@@ -40,18 +40,17 @@ ROCK7_TX_ERRORS = {'10': 'Invalid login credentials',
                    '15': 'Data too long',
                    '16': 'No Data',
                    '99': 'System Error'}
-                   
+
 # Only send these MAVLink commands, to save bandwidth
-ALLOWABLE_CMDS = [20, #MAV_CMD_NAV_RETURN_TO_LAUNCH
-                 21, #MAV_CMD_NAV_LAND
-                 22, #MAV_CMD_NAV_TAKEOFF
-                 84, #MAV_CMD_NAV_VTOL_TAKEOFF
-                 85, #MAV_CMD_NAV_VTOL_LAND
-                 176, #MAV_CMD_DO_SET_MODE
-                 300, #MAV_CMD_MISSION_START
-                 400, #MAV_CMD_COMPONENT_ARM_DISARM
-                 2600, #MAV_CMD_CONTROL_HIGH_LATENCY
-                 ]
+ALLOWABLE_CMDS = [20,    # MAV_CMD_NAV_RETURN_TO_LAUNCH
+                  21,    # MAV_CMD_NAV_LAND
+                  22,    # MAV_CMD_NAV_TAKEOFF
+                  84,    # MAV_CMD_NAV_VTOL_TAKEOFF
+                  85,    # MAV_CMD_NAV_VTOL_LAND
+                  176,   # MAV_CMD_DO_SET_MODE
+                  300,   # MAV_CMD_MISSION_START
+                  400,   # MAV_CMD_COMPONENT_ARM_DISARM
+                  2600]  # MAV_CMD_CONTROL_HIGH_LATENCY
 
 UDP_MAX_PACKET_LEN = 65535
 
@@ -66,48 +65,49 @@ if __name__ == '__main__':
     parser.add_argument("-rock7password", help="Rock7 password")
 
     args = parser.parse_args()
-    
+
     aio = Client(args.adafruitusername, args.adafruitkey)
     lastpacket = None
-    
+
     mavUAV = mavlink1.MAVLink(255, 0, use_native=False)
     mavGCS = mavlink1.MAVLink(255, 0, use_native=False)
-    
+
     udp_dir = args.out.split(':')[0]
     out_ip = args.out.split(':')[1]
     out_port = int(args.out.split(':')[2])
-    
+
     clientIPPort = None
-    
+
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if udp_dir == 'udpin':
         UDPClientSocket.bind((out_ip, out_port))
     UDPClientSocket.settimeout(1.0)
     UDPClientSocket.setblocking(0)
-    
+
     while True:
+        raw_data = None
         # get the raw data from AdafruitIO
         try:
             raw_feed = aio.feeds(args.adafruitfeed)
         except:
             print("Error accessing Adafruit.io feed. Check the username, feed name and key are correct")
             sys.exit(0)
-        
+
         print("Checking for new packet at {0}".format(datetime.utcnow().strftime("%Y-%m-%d, %H:%M:%S")))
-        
+
         try:
             raw_data = aio.receive(raw_feed.key).value
         except errors.RequestError:
             print("No data in feed")
             continue
-        
+
         data = json.loads(raw_data)
         datetime_object = datetime.strptime(data['transmit_time'] + " UTC", '%y-%m-%d %H:%M:%S %Z')
-        
-        
-        #print(data)
-        
+
+
+        # print(data)
+
         # Only accept if packet less than 60 seconds old and we've not already seen it
         if datetime.utcnow()-datetime_object < timedelta(minutes=10) and lastpacket != data:
             # Start parsing the data
@@ -115,13 +115,13 @@ if __name__ == '__main__':
                                                                                data['iridium_longitude'],
                                                                                datetime_object))
             lastpacket = data
-            
+
             # Parse incoming bytes - debugging
             msgList = mavUAV.parse_buffer(bytes.fromhex(data['data']))
             if msgList:
                 for msg in msgList:
                     print(msg)
-                   
+
             # send on to GCS (raw bytes)
             if clientIPPort and udp_dir == 'udpin':
                 UDPClientSocket.sendto(bytes.fromhex(data['data']), clientIPPort)
@@ -129,7 +129,7 @@ if __name__ == '__main__':
                 UDPClientSocket.sendto(bytes.fromhex(data['data']), (out_ip, out_port))
         elif lastpacket != data:
             print("Adafruit.io packet too old. Packet time = {0}, Current time = {1}".format(datetime_object, datetime.utcnow()))
-            
+
         # get incoming bytes from GCS
         data = None
         addr = None
@@ -139,7 +139,7 @@ if __name__ == '__main__':
             try:
                 data, addr = UDPClientSocket.recvfrom(UDP_MAX_PACKET_LEN)
             except socket.error as e:
-                if e.errno in [ errno.EAGAIN, errno.EWOULDBLOCK, errno.ECONNREFUSED ]:
+                if e.errno in [errno.EAGAIN, errno.EWOULDBLOCK, errno.ECONNREFUSED]:
                     do_check = False
                 else:
                     raise
@@ -153,10 +153,10 @@ if __name__ == '__main__':
                     for msg in msgList:
                         if (msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT', 'SET_MODE'] and int(msg.command) in ALLOWABLE_CMDS) or msg.get_type() == 'MISSION_ITEM_INT':
                             url = "{0}?imei={1}&username={2}&password={3}&data={4}&flush=yes".format(ROCK7_URL,
-                                                                                           args.imei,
-                                                                                           quote(args.rock7username),
-                                                                                           quote(args.rock7password),
-                                                                                           "".join("%02x" % b for b in msg.get_msgbuf()))
+                                                                                                     args.imei,
+                                                                                                     quote(args.rock7username),
+                                                                                                     quote(args.rock7password),
+                                                                                                     "".join("%02x" % b for b in msg.get_msgbuf()))
                             print("Sending: " + str(msg))
                             response = requests.post(url, headers={"Accept": "text/plain"})
                             responseSplit = response.text.split(',')
@@ -169,7 +169,7 @@ if __name__ == '__main__':
                                     print("Unknown error: " + response)
                             else:
                                 print("Sent {0} bytes OK".format(len(msg.get_msgbuf())))
-                            
+
             else:
                 # We've gotten all bytes from the GCS
                 do_check = False
