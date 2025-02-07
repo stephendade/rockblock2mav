@@ -41,6 +41,11 @@ ROCK7_TX_ERRORS = {'10': 'Invalid login credentials',
                    '16': 'No Data',
                    '99': 'System Error'}
 
+# Note command_long and command_int are allowed, but only certain commands
+ALLOWABLE_MESSAGES = ["MISSION_ITEM_INT",
+                      "MISSION_SET_CURRENT",
+                      "SET_MODE"]
+
 # Only send these MAVLink commands, to save bandwidth
 ALLOWABLE_CMDS = [20,    # MAV_CMD_NAV_RETURN_TO_LAUNCH
                   21,    # MAV_CMD_NAV_LAND
@@ -48,8 +53,12 @@ ALLOWABLE_CMDS = [20,    # MAV_CMD_NAV_RETURN_TO_LAUNCH
                   84,    # MAV_CMD_NAV_VTOL_TAKEOFF
                   85,    # MAV_CMD_NAV_VTOL_LAND
                   176,   # MAV_CMD_DO_SET_MODE
+                  178,   # MAV_CMD_DO_CHANGE_SPEED
+                  183,   # MAV_CMD_DO_SET_SERVO
+                  208,   # MAV_CMD_DO_PARACHUTE
                   300,   # MAV_CMD_MISSION_START
                   400,   # MAV_CMD_COMPONENT_ARM_DISARM
+                  192,   # MAV_CMD_DO_REPOSITION
                   2600]  # MAV_CMD_CONTROL_HIGH_LATENCY
 
 UDP_MAX_PACKET_LEN = 65535
@@ -150,26 +159,38 @@ if __name__ == '__main__':
                 except mavlink1.MAVError:
                     pass
                 if msgList:
+                    # queue up the messages (up to 50 bytes. Note format is 00 for each byte, so doubled) for sending 
+                    # to the RockBlock
+                    all_msgbuf = ''
                     for msg in msgList:
-                        if (msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT', 'SET_MODE'] and int(msg.command) in ALLOWABLE_CMDS) or msg.get_type() == 'MISSION_ITEM_INT':
-                            url = "{0}?imei={1}&username={2}&password={3}&data={4}&flush=yes".format(ROCK7_URL,
-                                                                                                     args.imei,
-                                                                                                     quote(args.rock7username),
-                                                                                                     quote(args.rock7password),
-                                                                                                     "".join("%02x" % b for b in msg.get_msgbuf()))
-                            print("Sending: " + str(msg))
-                            response = requests.post(url, headers={"Accept": "text/plain"})
-                            responseSplit = response.text.split(',')
-                            if len(msg.get_msgbuf()) > 50:
-                                print("Warning, message greater than 50 bytes")
-                            if responseSplit[0] != 'OK' and len(responseSplit) > 1:
-                                if responseSplit[1] in ROCK7_TX_ERRORS.keys():
-                                    print("Error sending command: " + ROCK7_TX_ERRORS[responseSplit[1]])
-                                else:
-                                    print("Unknown error: " + response)
+                        # Filter by acceptable messages and commands
+                        if msg.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msg.command) in ALLOWABLE_CMDS and len(all_msgbuf) <= 50:
+                            print("Adding to send queue: " + str(msg))
+                            all_msgbuf += "".join("%02x" % b for b in msg.get_msgbuf())
+                            print("Message buffer length: {0}/50".format(len(all_msgbuf)/2))
+                        elif msg.get_type() in ALLOWABLE_MESSAGES and len(all_msgbuf) <= 50:
+                            all_msgbuf += "".join("%02x" % b for b in msg.get_msgbuf())
+                            print("Adding to send queue: " + str(msg))
+                            print("Message buffer length: {0}/50".format(len(all_msgbuf)/2))
+                        elif len(all_msgbuf) > 50:
+                            print("Message buffer full, not adding {0}".format(msg.get_type()))
+                    if all_msgbuf:
+                        url = "{0}?imei={1}&username={2}&password={3}&data={4}&flush=yes".format(ROCK7_URL,
+                                                                                                 args.imei,
+                                                                                                 quote(args.rock7username),
+                                                                                                 quote(args.rock7password),
+                                                                                                 all_msgbuf)
+                        response = requests.post(url, headers={"Accept": "text/plain"})
+                        responseSplit = response.text.split(',')
+                        if len(all_msgbuf)/2 > 50:
+                            print("Warning, messages greater than 50 bytes")
+                        if responseSplit[0] != 'OK' and len(responseSplit) > 1:
+                            if responseSplit[1] in ROCK7_TX_ERRORS.keys():
+                                print("Error sending command: " + ROCK7_TX_ERRORS[responseSplit[1]])
                             else:
-                                print("Sent {0} bytes OK".format(len(msg.get_msgbuf())))
-
+                                print("Unknown error: " + response)
+                        else:
+                            print("Sent {0} bytes OK".format(len(msg.get_msgbuf())))
             else:
                 # We've gotten all bytes from the GCS
                 do_check = False
