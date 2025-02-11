@@ -5,7 +5,7 @@ Simple Python script for sending and receiving MAVLink messages using the RockBl
 This gateway runs on the GCS, and will send/recieve MAVLink messages between the GCS and RockBlock servers.
 
 Due to bandwidth constraints (50 bytes per message) MAVLink 1 is used, as it uses slightly less bytes per message
-compared to MAVLink2.
+compared to MAVLink2. An option is available (``-mav20``) to convert messages to/from MAVLink V2 on the GCS side. This allows the GCS to continue using MAVLink V2.
 
 There are two methods to run the gateway for recieving packets:
 - Using Adafuit.io (https://io.adafruit.com/) to recieve the packets
@@ -34,9 +34,11 @@ An Adafuit.io account (https://io.adafruit.com/) is required.
 - ``-adafruitfeed``           Adafruit.io feed name
 - ``-adafruitkey``            Adafruit.io API key
 - ``-imei``                   Iridium Modem IMEI number
-- ``-out``                    MAVLink connection string (default: udpin:127.0.0.1:16000). Format: udpin:IP:Port or udpout:IP:Port
+- ``-out``                    MAVLink connection string (default: udpin:127.0.0.1:16000) to GCS
 - ``-rock7username``          Rock7 account username
 - ``-rock7password``          Rock7 account password
+- ``-debug``             MAVLink connection string to view messages sent to the vehicle
+- ``-mav20``             Use MAVLink V2 messages on ``-out``, instead of MAVLink V1
 
 ## Using a public webserver
 A server (such as Amazon EC2) with a public URL is required.
@@ -52,10 +54,12 @@ A server (such as Amazon EC2) with a public URL is required.
 
 ### Commandline options
 - ``-imei``              Iridium Modem IMEI number
-- ``-out``               MAVLink connection string (default: udpin:127.0.0.1:16000). Format: udpin:IP:Port or udpout:IP:Port
+- ``-out``               MAVLink connection string (default: udpin:127.0.0.1:16000) to GCS
 - ``-rock7username``     Rock7 account username
 - ``-rock7password``     Rock7 account password
 - ``-tcpinput``          Public ip and port to bind to, for the Rock7 webhook. In format <IP>:<port>
+- ``-debug``             MAVLink connection string to view messages sent to the vehicle
+- ``-mav20``             Use MAVLink V2 messages on ``-out``, instead of MAVLink V1
 
 ## GCS Connections
 
