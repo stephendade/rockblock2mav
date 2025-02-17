@@ -61,6 +61,19 @@ A server (such as Amazon EC2) with a public URL is required.
 - ``-debug``             MAVLink connection string to view messages sent to the vehicle
 - ``-mav20``             Use MAVLink V2 messages on ``-out``, instead of MAVLink V1
 
+## SystemD Service
+
+For running unattended, a Systemd service is provided at ``rockblock2mav.service``. The file may need to be edited to
+have the correct user and folder specificed (current default is user "pi").
+
+To install the service, run the following:
+```
+sudo cp rockblock2mav.service /etc/systemd/system
+sudo systemctl daemon-reload
+sudo systemctl enable rockblock2mav.service
+sudo systemctl start rockblock2mav.service
+```
+
 ## GCS Connections
 
 Note for QGC users:

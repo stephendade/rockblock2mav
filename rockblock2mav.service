@@ -1,0 +1,13 @@
+[Unit]
+Description=Rockblock2mav
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/rockblock2mav
+ExecStart=/usr/bin/python3 rockblock2mav.py
+Restart=on-failure
+User=pi
+
+[Install]
+WantedBy=multi-user.target
+
