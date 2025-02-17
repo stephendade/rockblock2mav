@@ -63,8 +63,7 @@ A server (such as Amazon EC2) with a public URL is required.
 
 ## SystemD Service
 
-For running unattended, a Systemd service is provided at ``rockblock2mav.service``. The file may need to be edited to
-have the correct user and folder specificed (current default is user "pi").
+For running unattended, a Systemd service is provided at ``rockblock2mav.service``. The file will need to be edited to have the correct user and folder specified (current default is user "pi"), along with the Rockblock account details
 
 To install the service, run the following:
 ```

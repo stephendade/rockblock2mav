@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/pi/rockblock2mav
-ExecStart=/usr/bin/python3 rockblock2mav.py
+ExecStart=/usr/bin/python3 rockblock2mav-webhook.py -out=udpout:127.0.0.1:14700 -imei=<IMEI> -rock7username=<EMAIL> -rock7password=<PASSWORD> -tcpinput=<PUBLIC_IP>:<PORT> -mav20
 Restart=on-failure
 User=pi
 
