@@ -26,6 +26,7 @@ from urllib.parse import quote
 
 from Adafruit_IO import Client, errors
 import pymavlink.mavutil as mavutil
+from pymavlink.dialects.v10 import ardupilotmega as mavlink1
 
 ROCK7_URL = 'https://rockblock.rock7.com/rockblock/MT'
 
@@ -78,6 +79,7 @@ if __name__ == '__main__':
     aio = Client(args.adafruitusername, args.adafruitkey)
     lastpacket = None
 
+    mavAdafruit = mavlink1.MAVLink(255, 0, use_native=False)
     mavGCS = mavutil.mavlink_connection(args.out)  # Sends packets vehicle -> GCS
     mavUAV = mavutil.mavlink_connection(args.debug)   # Repacks packets GCS -> vehicle
     mavUAV.WIRE_PROTOCOL_VERSION = "1.0"
@@ -106,9 +108,6 @@ if __name__ == '__main__':
         data = json.loads(raw_data)
         datetime_object = datetime.strptime(data['transmit_time'] + " UTC", '%y-%m-%d %H:%M:%S %Z')
 
-
-        # print(data)
-
         # Only accept if packet less than 60 seconds old and we've not already seen it
         if datetime.utcnow()-datetime_object < timedelta(minutes=10) and lastpacket != data:
             # Start parsing the data
@@ -118,7 +117,7 @@ if __name__ == '__main__':
             lastpacket = data
 
             # Parse incoming bytes - debugging
-            msgList = mavUAV.parse_buffer(bytes.fromhex(data['data']))
+            msgList = mavAdafruit.parse_buffer(bytes.fromhex(data['data']))
             if msgList:
                 for msg in msgList:
                     print(msg)
