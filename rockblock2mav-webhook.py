@@ -74,25 +74,33 @@ def rockBlockFlaskThread(imei, ip, port):
 
     @app.route('/rock', methods=['POST'])
     def process_mo_packet():
-        # check if the packet is for this IMEI
-        if request.form['imei'] != imei:
-            return "Bad IMEI", 200
+        # print post parameters
+        print(request.form)
 
-        datetime_object = datetime.strptime(request.form['transmit_time'], '%y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
-        print("Got new packet, coords {0},{1}. Received at {2} UTC".format(request.form['iridium_latitude'],
-                                                                           request.form['iridium_longitude'],
-                                                                           datetime_object))
-        # if the packet time is too old, don't process it
-        if datetime_object < datetime.now(timezone.utc) - timedelta(minutes=5):
-            print("Packet too old")
-            return "Old packet", 200
-        # Parse incoming bytes
-        msgList = mavUAV.parse_buffer(bytes.fromhex(request.form['data']))
-        if msgList:
-            for msg in msgList:
-                print(msg)
-                ROCKBLOCK_RX_PACKETS.put(msg)
-        return "OK", 200
+        try:
+            # check if the packet is for this IMEI
+            if request.form['imei'] != imei:
+                print("Bad IMEI. Expected {0}, got {1}".format(imei, request.form['imei']))
+                return "Bad IMEI", 200
+
+            datetime_object = datetime.strptime(request.form['transmit_time'], '%y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
+            print("Got new packet, coords {0},{1}. Received at {2} UTC".format(request.form['iridium_latitude'],
+                                                                               request.form['iridium_longitude'],
+                                                                               datetime_object))
+            # if the packet time is too old, don't process it
+            if datetime_object < datetime.now(timezone.utc) - timedelta(minutes=5):
+                print("Packet too old")
+                return "Old packet", 200
+            # Parse incoming bytes
+            msgList = mavUAV.parse_buffer(bytes.fromhex(request.form['data']))
+            if msgList:
+                for msg in msgList:
+                    print(msg)
+                    ROCKBLOCK_RX_PACKETS.put(msg)
+            return "OK", 200
+        except Exception as e:
+            print("Error processing packet: {0}".format(e))
+            return "Error processing packet", 400
 
     app.run(host=ip, port=port)
 
