@@ -170,14 +170,17 @@ if __name__ == '__main__':
                 else:
                     msgbuf = msgGCS.get_msgbuf()
                 # Filter by acceptable messages and commands
-                if msgGCS.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msgGCS.command) in ALLOWABLE_CMDS and len(all_msgbuf) <= 50:
-                    print("Adding to send queue: " + str(msgGCS))
-                    all_msgbuf += "".join("%02x" % b for b in msgbuf)
-                    print("Message buffer length: {0}/50".format(len(all_msgbuf)/2))
-                elif msgGCS.get_type() in ALLOWABLE_MESSAGES and len(all_msgbuf) <= 50:
-                    all_msgbuf += "".join("%02x" % b for b in msgbuf)
-                    print("Adding to send queue: " + str(msgGCS))
-                    print("Message buffer length: {0}/50".format(len(all_msgbuf)/2))
+                if msgbuf[0] == 0xFD:
+                    print("Error: MAVLink2 packet detected. Please use -mav20 for conversion to MAVLink1")
+                else:
+                    if msgGCS.get_type() in ['COMMAND_LONG', 'COMMAND_INT'] and int(msgGCS.command) in ALLOWABLE_CMDS and len(all_msgbuf) <= 50:
+                        print("Adding to send queue: " + str(msgGCS))
+                        all_msgbuf += "".join("%02x" % b for b in msgbuf)
+                        print("Message buffer length: {0}/50".format(len(all_msgbuf)/2))
+                    elif msgGCS.get_type() in ALLOWABLE_MESSAGES and len(all_msgbuf) <= 50:
+                        all_msgbuf += "".join("%02x" % b for b in msgbuf)
+                        print("Adding to send queue: " + str(msgGCS))
+                        print("Message buffer length: {0}/50".format(len(all_msgbuf)/2))
             else:
                 # We've gotten all bytes from the GCS
                 do_check = False
