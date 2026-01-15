@@ -9,11 +9,7 @@ section of the documentation below**
 
 ## Rockblock 9704
 
-The Rockblock 9704 uses MAVLink2 messages.
-
-There are two methods to run the gateway for recieving packets:
-- Using Adafuit.io (https://io.adafruit.com/) to recieve the packets
-- Using a public-facing webserver to recieve the packets
+The Rockblock 9704 uses MAVLink2 messages, transmitted via the Cloudloop MQTT Gateway.
 
 Required hardware, software and services:
 - Rockblock Modem (such as https://www.groundcontrol.com/product/rockblock-9704/)
