@@ -71,8 +71,6 @@ mavproxy.py --master=udpout:127.0.0.1:16000 --console
 **Mission Planner:**
 - Use UDP connection
 - IP: 127.0.0.1, Port: 16000
-- Note: Change output to `udpin:127.0.0.1:14550` for better Mission Planner compatibility
-
 
 ### Limitations
 
